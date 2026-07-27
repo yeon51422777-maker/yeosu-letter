@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>편지 관리 - 한성교회</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#f5f6fa;font-family:"Noto Sans KR",sans-serif;color:#222;}
+
+.top{background:#fff;border-bottom:2px solid #e8eaf0;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.top h1{font-size:18px;font-weight:700;color:#1a3a6e;}
+.top .sub{font-size:11px;color:#888;margin-top:2px;}
+.live{display:flex;align-items:center;gap:8px;}
+.dot{width:8px;height:8px;border-radius:50%;background:#ccc;}
+.dot.on{background:#22c55e;box-shadow:0 0 6px #22c55e;}
+.badge{background:#e8f0fe;color:#1a3a6e;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;}
+
+.stats{display:flex;gap:14px;padding:20px 28px 0;flex-wrap:wrap;}
+.sc{background:#fff;border-radius:12px;padding:16px 20px;flex:1;min-width:120px;box-shadow:0 1px 6px rgba(0,0,0,0.07);border:1px solid #eee;}
+.sc .n{font-size:28px;font-weight:900;color:#1a3a6e;line-height:1;}
+.sc .l{font-size:11px;color:#888;margin-top:4px;}
+
+.toolbar{padding:16px 28px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.search{flex:1;min-width:180px;padding:8px 13px;border:1.5px solid #dde;border-radius:9px;font-size:13px;font-family:"Noto Sans KR",sans-serif;outline:none;}
+.search:focus{border-color:#4e7cf6;}
+.fbtn{padding:8px 14px;border-radius:9px;border:1.5px solid #dde;background:#fff;font-size:12px;cursor:pointer;transition:all .15s;font-family:"Noto Sans KR",sans-serif;}
+.fbtn.act{background:#4e7cf6;color:#fff;border-color:#4e7cf6;}
+.ebtn{padding:8px 16px;border-radius:9px;border:none;background:#22c55e;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:"Noto Sans KR",sans-serif;}
+
+.tw{margin:16px 28px 28px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 8px rgba(0,0,0,0.07);border:1px solid #eee;max-height:calc(100vh - 280px);overflow-y:auto;}
+table{width:100%;border-collapse:collapse;}
+thead{background:#f0f4ff;position:sticky;top:0;z-index:10;}
+th{padding:11px 14px;font-size:11px;font-weight:700;color:#1a3a6e;letter-spacing:0.5px;text-align:left;border-bottom:2px solid #e0e8f8;}
+td{padding:10px 14px;font-size:12px;border-bottom:1px solid #f0f0f4;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#f8f9ff;}
+tr.hidden-row td{opacity:0.4;background:#fafafa;}
+.td-date{color:#888;font-size:11px;white-space:nowrap;}
+.td-name{font-weight:700;color:#1a3a6e;white-space:nowrap;}
+.td-text{color:rgba(0,0,0,0.78);max-width:280px;line-height:1.5;}
+.no-data{text-align:center;padding:48px;color:#aaa;font-size:14px;}
+
+.actions{display:flex;gap:6px;white-space:nowrap;}
+.btn-hide{padding:4px 10px;border-radius:6px;border:1.5px solid #f0a000;background:#fff;color:#f0a000;font-size:11px;cursor:pointer;font-weight:700;transition:all .15s;}
+.btn-hide:hover{background:#fff8e1;}
+.btn-hide.hidden{background:#f0a000;color:#fff;}
+.btn-del{padding:4px 10px;border-radius:6px;border:1.5px solid #ef4444;background:#fff;color:#ef4444;font-size:11px;cursor:pointer;font-weight:700;transition:all .15s;}
+.btn-del:hover{background:#fff0f0;}
+
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;align-items:center;justify-content:center;}
+.modal-bg.show{display:flex;}
+.modal{background:#fff;border-radius:16px;padding:28px;max-width:360px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);}
+.modal h3{font-size:16px;font-weight:700;color:#222;margin-bottom:10px;}
+.modal p{font-size:13px;color:#666;line-height:1.6;margin-bottom:22px;}
+.modal .btns{display:flex;gap:10px;justify-content:center;}
+.modal .btn-cancel{padding:10px 24px;border-radius:9px;border:1.5px solid #dde;background:#fff;font-size:13px;cursor:pointer;font-family:"Noto Sans KR",sans-serif;}
+.modal .btn-confirm{padding:10px 24px;border-radius:9px;border:none;background:#ef4444;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:"Noto Sans KR",sans-serif;}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 22px;border-radius:50px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div>
+    <h1>📬 편지 관리 대시보드 — 한성교회</h1>
+    <div class="sub">Firebase Realtime Database 연동 · 삭제/숨김 관리</div>
+  </div>
+  <div class="live">
+    <div class="dot" id="ldot"></div>
+    <span style="font-size:12px;color:#888;" id="lstat">연결 중...</span>
+    <div class="badge" id="totalBadge">총 0건</div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="sc"><div class="n" id="s-total">0</div><div class="l">전체 편지</div></div>
+  <div class="sc"><div class="n" id="s-today">0</div><div class="l">오늘 편지</div></div>
+  <div class="sc"><div class="n" id="s-hour">0</div><div class="l">최근 1시간</div></div>
+  <div class="sc"><div class="n" id="s-hidden">0</div><div class="l">숨김 처리</div></div>
+</div>
+
+<div class="toolbar">
+  <input class="search" id="searchBox" placeholder="🔍 이름 또는 내용 검색..." oninput="renderTable()">
+  <button class="fbtn act" id="f-all"    onclick="setFilter('all')">전체</button>
+  <button class="fbtn"     id="f-today"  onclick="setFilter('today')">오늘</button>
+  <button class="fbtn"     id="f-hour"   onclick="setFilter('hour')">1시간</button>
+  <button class="fbtn"     id="f-hidden" onclick="setFilter('hidden')">숨김만</button>
+  <button class="ebtn"     onclick="exportCSV()">⬇ CSV 저장</button>
+  <button class="ebtn" style="background:#e07050;" onclick="confirmDeletePhotos()">🗑️ 사진 전체 삭제</button>
+</div>
+
+<div class="tw">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>날짜/시간</th>
+        <th>이름</th>
+        <th>이모지</th>
+        <th>편지 내용</th>
+        <th>관리</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3>🗑️ 편지를 삭제할까요?</h3>
+    <p id="modal-msg">이 편지를 삭제하면 복구할 수 없어요.<br>정말 삭제하시겠어요?</p>
+    <div class="btns">
+      <button class="btn-cancel" onclick="closeModal()">취소</button>
+      <button class="btn-confirm" id="modal-confirm">삭제</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const cfg={
+  apiKey:"AIzaSyAF8NZt4sy8S17jWdoZe06TTOOiF3gwccU",
+  authDomain:"church-letters.firebaseapp.com",
+  databaseURL:"https://church-letters-default-rtdb.firebaseio.com",
+  projectId:"church-letters",
+  storageBucket:"church-letters.firebasestorage.app",
+  messagingSenderId:"969302363841",
+  appId:"1:969302363841:web:f792105dad4e45b2cb8e40"
+};
+const db = getDatabase(initializeApp(cfg));
+
+let allLetters = [];
+let currentFilter = "all";
+let pendingDeleteKey = null;
+
+try {
+  onValue(ref(db,"letters"), snap=>{
+    document.getElementById("ldot").classList.add("on");
+    document.getElementById("lstat").textContent="실시간 연결됨";
+    allLetters=[];
+    snap.forEach(child=>{
+      const d=child.val();
+      if(d) allLetters.push({...d, key:child.key});
+    });
+    allLetters.sort((a,b)=>b.timestamp-a.timestamp);
+    updateStats();
+    renderTable();
+  });
+} catch(e){
+  document.getElementById("lstat").textContent="연결 실패";
+}
+
+function updateStats(){
+  const now=Date.now();
+  const todayStart=new Date(); todayStart.setHours(0,0,0,0);
+  document.getElementById("s-total").textContent=allLetters.length;
+  document.getElementById("s-today").textContent=allLetters.filter(l=>l.timestamp>=todayStart.getTime()).length;
+  document.getElementById("s-hour").textContent=allLetters.filter(l=>l.timestamp>=now-3600000).length;
+  document.getElementById("s-hidden").textContent=allLetters.filter(l=>l.hidden).length;
+  document.getElementById("totalBadge").textContent=`총 ${allLetters.length}건`;
+}
+
+window.setFilter=f=>{
+  currentFilter=f;
+  document.querySelectorAll(".fbtn").forEach(b=>b.classList.remove("act"));
+  document.getElementById("f-"+f).classList.add("act");
+  renderTable();
+};
+
+window.renderTable=()=>{
+  const q=(document.getElementById("searchBox").value||"").trim().toLowerCase();
+  const now=Date.now();
+  const todayStart=new Date(); todayStart.setHours(0,0,0,0);
+  let items=[...allLetters];
+  if(currentFilter==="today")  items=items.filter(l=>l.timestamp>=todayStart.getTime());
+  if(currentFilter==="hour")   items=items.filter(l=>l.timestamp>=now-3600000);
+  if(currentFilter==="hidden") items=items.filter(l=>l.hidden);
+  if(q) items=items.filter(l=>(l.name||"").toLowerCase().includes(q)||(l.text||"").toLowerCase().includes(q));
+
+  const tbody=document.getElementById("tbody");
+  if(!items.length){tbody.innerHTML=`<tr><td colspan="6" class="no-data">편지가 없어요 🕊️</td></tr>`;return;}
+
+  tbody.innerHTML=items.map((l,i)=>{
+    const d=new Date(l.timestamp);
+    const ds=`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`;
+    const ts=`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+    const txt=(l.text||"").replace(/</g,"&lt;").replace(/\n/g,"<br>");
+    const hiddenClass=l.hidden?"hidden-row":"";
+    const hideLabel=l.hidden?"👁️ 보이기":"🔒 숨김";
+    const hideBtnClass=l.hidden?"btn-hide hidden":"btn-hide";
+    return `<tr class="${hiddenClass}" id="row-${l.key}">
+      <td style="color:#aaa;font-size:11px;">${items.length-i}</td>
+      <td class="td-date">${ds}<br>${ts}</td>
+      <td class="td-name">${(l.name||"익명").replace(/</g,"&lt;")}</td>
+      <td style="font-size:15px;">${l.emojis||""}</td>
+      <td class="td-text">${txt}</td>
+      <td><div class="actions">
+        <button class="${hideBtnClass}" onclick="toggleHide('${l.key}',${!!l.hidden})">${hideLabel}</button>
+        <button class="btn-del" onclick="confirmDelete('${l.key}','${(l.name||"익명").replace(/'/g,"\\'")}')">🗑️ 삭제</button>
+      </div></td>
+    </tr>`;
+  }).join("");
+};
+
+window.toggleHide=(key, isHidden)=>{
+  update(ref(db,`letters/${key}`),{hidden: !isHidden})
+    .then(()=>showToast(isHidden?"👁️ 편지가 다시 표시돼요":"🔒 편지가 스크린에서 숨겨졌어요"))
+    .catch(()=>showToast("❌ 오류가 발생했어요"));
+};
+
+window.confirmDelete=(key, name)=>{
+  pendingDeleteKey=key;
+  document.getElementById("modal-msg").innerHTML=`<b>${name}</b>님의 편지를 삭제하면<br>복구할 수 없어요. 정말 삭제할까요?`;
+  document.getElementById("modal").classList.add("show");
+  document.getElementById("modal-confirm").onclick=()=>doDelete();
+};
+window.closeModal=()=>{
+  document.getElementById("modal").classList.remove("show");
+  pendingDeleteKey=null;
+};
+
+function doDelete(){
+  if(!pendingDeleteKey) return;
+  remove(ref(db,`letters/${pendingDeleteKey}`))
+    .then(()=>{closeModal();showToast("🗑️ 편지가 삭제됐어요");})
+    .catch(()=>{closeModal();showToast("❌ 삭제 오류가 발생했어요");});
+}
+
+// 사진 전체 삭제
+window.confirmDeletePhotos = () => {
+  const cnt = allLetters.filter(l => l.photo).length;
+  if(cnt === 0){ showToast("📷 사진이 없어요"); return; }
+  document.getElementById("modal-msg").innerHTML =
+    `사진이 포함된 편지 <b>${cnt}건</b>의 사진을 삭제할까요?<br>편지 내용은 유지됩니다.`;
+  document.getElementById("modal").classList.add("show");
+  document.getElementById("modal-confirm").onclick = doDeletePhotos;
+};
+
+async function doDeletePhotos(){
+  closeModal();
+  const targets = allLetters.filter(l => l.photo);
+  let done = 0;
+  for(const l of targets){
+    await update(ref(db, `letters/${l.key}`), {photo: null}).catch(()=>{});
+    done++;
+  }
+  showToast(`🗑️ 사진 ${done}건 삭제 완료`);
+}
+
+window.exportCSV=()=>{
+  const rows=[["번호","날짜","시간","이름","이모지","내용","숨김"]];
+  [...allLetters].reverse().forEach((l,i)=>{
+    const d=new Date(l.timestamp);
+    rows.push([
+      i+1,
+      `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`,
+      `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`,
+      l.name||"익명", l.emojis||"",
+      (l.text||"").replace(/\n/g," "),
+      l.hidden?"숨김":""
+    ]);
+  });
+  const csv="\uFEFF"+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  a.download=`church-letters-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+};
+
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
+</script>
+</body>
+</html>

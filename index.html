@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>예수님께 편지 보내기</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#FBF3E0;--brown:#6B3F1E;--wood:#a9703f;--navy:#1a3a6e;--ocean:#2c6bb0;--rope:#c9a24b;--border:#d9b98a;--accent:#e07a3a;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{min-height:100vh;font-family:"Noto Sans KR",sans-serif;
+  background:
+    linear-gradient(to bottom,#8fd4f0 0%,#a5ddf3 22%,#6cb7e6 42%,#2c6bb0 58%,#1f5599 74%,#173f73 100%);
+  background-attachment:fixed;}
+/* 물결 느낌 */
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(120% 60px at 50% 44%,rgba(255,255,255,0.35),transparent 70%),
+    repeating-linear-gradient(180deg,rgba(255,255,255,0.05) 0 2px,transparent 2px 22px);
+  opacity:.6;}
+#main,#suc{position:relative;z-index:1;}
+
+.header{text-align:center;padding:26px 20px 14px;}
+.header-emoji{font-size:44px;display:block;margin-bottom:6px;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 3px 5px rgba(0,0,0,.2));}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+/* 밧줄 테두리 나무 간판 */
+.signboard{display:inline-block;background:linear-gradient(160deg,#fdf6e3,#f3e3c0);border:3px solid var(--rope);border-radius:16px;
+  padding:12px 26px;box-shadow:0 8px 22px rgba(20,50,90,0.35),inset 0 0 0 2px #fff9ec;
+  background-image:linear-gradient(160deg,#fdf6e3,#f3e3c0);position:relative;}
+.signboard .cap{font-size:11px;color:var(--ocean);font-weight:700;letter-spacing:3px;margin-bottom:2px;}
+.signboard h1{font-size:23px;color:var(--navy);font-weight:900;letter-spacing:1.5px;}
+.header p{font-size:12px;color:#eaf6ff;letter-spacing:0.8px;margin-top:10px;text-shadow:0 1px 3px rgba(0,40,80,.4);}
+
+/* 편지 카드 = 항해일지 / 나무판 위 양피지 */
+.letter-card{margin:0 16px 20px;background:#fffdf5;border-radius:18px;
+  box-shadow:0 10px 30px rgba(15,40,75,0.35),inset 0 1px 0 rgba(255,255,255,0.9);
+  border:2px solid var(--rope);overflow:hidden;}
+.card-top{height:42px;background:linear-gradient(135deg,#2c6bb0,#173f73);border-bottom:2px solid var(--rope);display:flex;align-items:center;justify-content:center;gap:10px;}
+.card-top .dec{font-size:15px;opacity:0.9;}
+.card-top .ttl{font-size:12px;color:#fff;font-weight:700;letter-spacing:3px;}
+.card-body{padding:18px 18px 22px;background-image:repeating-linear-gradient(transparent,transparent 36px,rgba(44,107,176,0.10) 36px,rgba(44,107,176,0.10) 37px);background-position:0 50px;}
+
+.lbl{font-size:14px;color:var(--navy);font-family:"Noto Sans KR",sans-serif;font-weight:700;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.lbl-sub{font-size:11px;color:#9bb4cc;font-weight:400;margin-left:4px;}
+
+/* 텍스트박스 */
+.tbox{width:100%;background:rgba(245,251,255,0.9);border:1.5px solid var(--border);border-radius:10px;padding:11px 13px;font-size:14px;font-family:"Noto Sans KR",sans-serif;font-weight:400;color:rgba(0,0,0,0.82);outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:18px;}
+.tbox::placeholder{color:#a7bdd2;font-size:13px;}
+.tbox:focus{border-color:var(--ocean);box-shadow:0 0 0 3px rgba(44,107,176,0.15);}
+textarea.tbox{min-height:130px;resize:none;line-height:1.7;}
+
+/* 이모지 */
+.emoji-grid{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px;margin-bottom:18px;}
+.emoji-btn{width:50px;height:50px;border-radius:13px;border:2px solid var(--border);background:rgba(245,251,255,0.85);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;position:relative;user-select:none;}
+.emoji-btn:active{transform:scale(.91);}
+.emoji-btn.on{border-color:var(--ocean);background:rgba(44,107,176,0.14);box-shadow:0 0 0 3px rgba(44,107,176,0.22);transform:scale(1.06);}
+.emoji-btn.on::after{content:"✓";position:absolute;top:-5px;right:-5px;width:15px;height:15px;background:var(--ocean);color:#fff;border-radius:50%;font-size:8px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+
+.char-count{text-align:right;font-size:11px;color:#7f9bb5;margin-top:-14px;margin-bottom:4px;}
+.char-count.warn{color:var(--accent);}
+
+/* 📷 사진 업로드 */
+.photo-zone{margin-bottom:18px;}
+.photo-lbl{display:flex;align-items:center;gap:10px;padding:13px 14px;border:1.5px dashed var(--border);border-radius:10px;cursor:pointer;background:rgba(245,251,255,0.8);transition:all .2s;}
+.photo-lbl:active{background:rgba(44,107,176,0.08);border-color:var(--ocean);}
+.photo-ico{font-size:22px;}
+.photo-txt{font-size:13px;color:#9bb4cc;font-family:"Noto Sans KR",sans-serif;}
+.photo-prev{display:none;position:relative;border-radius:10px;overflow:hidden;border:1.5px solid var(--border);}
+.photo-prev img{width:100%;max-height:180px;object-fit:cover;display:block;}
+.photo-del{position:absolute;top:7px;right:7px;width:26px;height:26px;border-radius:50%;border:none;background:rgba(0,0,0,0.52);color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+
+.send-wrap{padding:0 16px 32px;}
+.send-btn{width:100%;padding:17px;border-radius:16px;border:none;background:linear-gradient(135deg,#2c6bb0,#173f73);color:#fff;font-size:16px;font-family:"Noto Sans KR",sans-serif;font-weight:700;letter-spacing:2.5px;cursor:pointer;box-shadow:0 6px 20px rgba(15,50,95,0.45);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:9px;border:2px solid var(--rope);}
+.send-btn:active{transform:scale(.97);}
+.send-btn:disabled{opacity:.6;pointer-events:none;}
+.send-btn .ico{font-size:20px;animation:float 2s ease-in-out infinite;}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.5);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.success{display:none;text-align:center;padding:64px 28px;animation:fadeUp .5s ease-out;}
+.success.show{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+.suc-icon{font-size:76px;display:block;margin-bottom:18px;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 4px 6px rgba(0,0,0,.25));}
+.suc-title{font-size:22px;color:#fff;font-weight:900;margin-bottom:10px;letter-spacing:1.5px;text-shadow:0 2px 6px rgba(0,40,80,.5);}
+.suc-msg{font-size:14px;color:#eaf6ff;line-height:1.85;margin-bottom:28px;text-shadow:0 1px 3px rgba(0,40,80,.4);}
+.again-btn{padding:13px 34px;border-radius:50px;border:2px solid var(--rope);background:rgba(255,255,255,0.14);color:#fff;font-size:13px;font-family:"Noto Sans KR",sans-serif;cursor:pointer;letter-spacing:1.5px;}
+.again-btn:active{transform:scale(.96);}
+
+#overlay{position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden;}
+.fly{position:absolute;font-size:18px;animation:flyUp 1.2s ease-out forwards;}
+@keyframes flyUp{0%{transform:translate(0,0) scale(1) rotate(0deg);opacity:1;}100%{transform:translate(var(--tx),var(--ty)) scale(.3) rotate(360deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div id="main">
+  <div class="header">
+    <span class="header-emoji">⚓</span>
+    <div class="signboard">
+      <div class="cap">26여수노회 유초등부캠프 · 믿음의 항해</div>
+      <h1>예수님께 편지 보내기</h1>
+    </div>
+    <p>⛵ 마음속 이야기를 예수님께 띄워보세요</p>
+  </div>
+  <div class="letter-card">
+    <div class="card-top">
+      <span class="dec">⚓</span><span class="ttl">나의 항해일지</span><span class="dec">⚓</span>
+    </div>
+    <div class="card-body">
+      <div class="lbl">✝️ &nbsp;이름 <span class="lbl-sub">(선택)</span></div>
+      <input class="tbox" id="name" type="text" placeholder="이름 또는 닉네임" maxlength="20">
+
+      <div class="lbl">💛 &nbsp;마음을 표현해요</div>
+      <div class="emoji-grid">
+        <button class="emoji-btn" data-e="✝️">✝️</button>
+        <button class="emoji-btn" data-e="🕊️">🕊️</button>
+        <button class="emoji-btn" data-e="🙏">🙏</button>
+        <button class="emoji-btn" data-e="❤️">❤️</button>
+        <button class="emoji-btn" data-e="⭐">⭐</button>
+        <button class="emoji-btn" data-e="🌿">🌿</button>
+      </div>
+
+      <div class="lbl">✉️ &nbsp;편지 내용</div>
+      <textarea class="tbox" id="msg" maxlength="150" placeholder="예수님께 전하고 싶은 말을 써보세요...&#10;감사한 것, 기도 제목, 사랑의 고백&#10;무엇이든 좋아요 ♡"></textarea>
+      <div class="char-count" id="cnt">0 / 150</div>
+
+      <div class="lbl">📷 &nbsp;사진 <span class="lbl-sub">(선택 · 화면에만 표시)</span></div>
+      <div class="photo-zone">
+        <label class="photo-lbl" for="photoInput" id="photoLbl">
+          <span class="photo-ico">📷</span>
+          <span class="photo-txt">사진을 선택하세요</span>
+        </label>
+        <input type="file" id="photoInput" accept="image/*" style="display:none">
+        <div class="photo-prev" id="photoPrev">
+          <img id="prevImg" src="" alt="미리보기">
+          <button type="button" class="photo-del" id="photoDelBtn">✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="send-wrap">
+    <button class="send-btn" id="sendBtn">
+      <span class="ico">✉️</span>예수님께 보내기
+      <div class="spinner" id="sp"></div>
+    </button>
+  </div>
+</div>
+
+<div id="suc" class="success">
+  <span class="suc-icon">⛵</span>
+  <div class="suc-title">편지가 출항했어요!</div>
+  <div class="suc-msg">당신의 마음이<br>믿음의 바다를 건너<br>예수님께 항해하고 있어요 ✨<br><br>화면(스크린)을 바라봐 주세요</div>
+  <button class="again-btn" id="againBtn">⚓ 다시 쓰기</button>
+</div>
+<div id="overlay"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const cfg={apiKey:"AIzaSyAF8NZt4sy8S17jWdoZe06TTOOiF3gwccU",authDomain:"church-letters.firebaseapp.com",databaseURL:"https://church-letters-default-rtdb.firebaseio.com",projectId:"church-letters",storageBucket:"church-letters.firebasestorage.app",messagingSenderId:"969302363841",appId:"1:969302363841:web:f792105dad4e45b2cb8e40"};
+const db=getDatabase(initializeApp(cfg));
+
+// ── 이모지 ──
+const sel=new Set();
+document.querySelectorAll(".emoji-btn").forEach(b=>{
+  b.addEventListener("click",()=>{const e=b.dataset.e;sel.has(e)?(sel.delete(e),b.classList.remove("on")):(sel.add(e),b.classList.add("on"));});
+});
+
+// ── 글자 수 ──
+const ta=document.getElementById("msg"),cnt=document.getElementById("cnt");
+ta.addEventListener("input",()=>{const l=ta.value.length;cnt.textContent=`${l} / 150`;cnt.classList.toggle("warn",l>130);});
+
+// ── 사진 압축 ──
+let photoBase64 = null;
+
+function compressImage(file, maxSize, quality){
+  return new Promise(resolve=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width, h=img.height;
+        if(w>h){ if(w>maxSize){h=Math.round(h*maxSize/w);w=maxSize;} }
+        else    { if(h>maxSize){w=Math.round(w*maxSize/h);h=maxSize;} }
+        const canvas=document.createElement("canvas");
+        canvas.width=w; canvas.height=h;
+        canvas.getContext("2d").drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL("image/jpeg",quality));
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById("photoInput").addEventListener("change",async e=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  photoBase64=await compressImage(file,500,0.65);
+  document.getElementById("prevImg").src=photoBase64;
+  document.getElementById("photoPrev").style.display="block";
+  document.getElementById("photoLbl").style.display="none";
+});
+
+document.getElementById("photoDelBtn").addEventListener("click",()=>{
+  photoBase64=null;
+  document.getElementById("photoInput").value="";
+  document.getElementById("prevImg").src="";
+  document.getElementById("photoPrev").style.display="none";
+  document.getElementById("photoLbl").style.display="flex";
+});
+
+// ── 버스트 효과 ──
+function burst(){
+  const ov=document.getElementById("overlay");
+  const sym=["✦","🕊️","❤️","✝️","⭐","✨","🌿","💛"];
+  for(let i=0;i<18;i++){
+    const el=document.createElement("span");el.className="fly";
+    el.textContent=sym[~~(Math.random()*sym.length)];
+    el.style.left=(20+Math.random()*60)+"%";el.style.top=(50+Math.random()*30)+"%";
+    const a=(-60+Math.random()*120)*Math.PI/180,d=100+Math.random()*180;
+    el.style.setProperty("--tx",Math.cos(a)*d+"px");el.style.setProperty("--ty",-(d*.8+Math.random()*90)+"px");
+    el.style.animationDelay=(Math.random()*.4)+"s";el.style.fontSize=(15+Math.random()*14)+"px";
+    ov.appendChild(el);setTimeout(()=>el.remove(),2000);
+  }
+}
+
+// ── 전송 ──
+document.getElementById("sendBtn").addEventListener("click",async()=>{
+  const name=document.getElementById("name").value.trim()||"익명";
+  const text=ta.value.trim();const emojis=[...sel].join(" ");
+  if(!text){ta.focus();ta.style.borderColor="#e07050";setTimeout(()=>ta.style.borderColor="",1500);return;}
+  const btn=document.getElementById("sendBtn"),sp=document.getElementById("sp");
+  btn.disabled=true;sp.style.display="block";
+  try{
+    const data={name,emojis,text,timestamp:Date.now()};
+    if(photoBase64) data.photo=photoBase64;   // 사진 있을 때만 포함
+    await push(ref(db,"letters"),data);
+    burst();
+    setTimeout(()=>{document.getElementById("main").style.display="none";document.getElementById("suc").classList.add("show");},500);
+  }catch(e){alert("전송 오류. 다시 시도해주세요.");btn.disabled=false;sp.style.display="none";}
+});
+
+// ── 다시 쓰기 ──
+document.getElementById("againBtn").addEventListener("click",()=>{
+  document.getElementById("name").value="";ta.value="";cnt.textContent="0 / 150";cnt.classList.remove("warn");
+  sel.clear();document.querySelectorAll(".emoji-btn").forEach(b=>b.classList.remove("on"));
+  // 사진 초기화
+  photoBase64=null;
+  document.getElementById("photoInput").value="";
+  document.getElementById("prevImg").src="";
+  document.getElementById("photoPrev").style.display="none";
+  document.getElementById("photoLbl").style.display="flex";
+  document.getElementById("suc").classList.remove("show");document.getElementById("main").style.display="block";
+  document.getElementById("sendBtn").disabled=false;document.getElementById("sp").style.display="none";
+});
+</script>
+</body>
+</html>
