@@ -91,6 +91,7 @@ tr.hidden-row td{opacity:0.4;background:#fafafa;}
   <button class="fbtn"     id="f-hidden" onclick="setFilter('hidden')">숨김만</button>
   <button class="ebtn"     onclick="exportCSV()">⬇ CSV 저장</button>
   <button class="ebtn" style="background:#e07050;" onclick="confirmDeletePhotos()">🗑️ 사진 전체 삭제</button>
+  <button class="ebtn" style="background:#c0392b;" onclick="confirmDeleteAll()">🧹 전체 편지 삭제(리셋)</button>
 </div>
 
 <div class="tw">
@@ -253,6 +254,23 @@ async function doDeletePhotos(){
     done++;
   }
   showToast(`🗑️ 사진 ${done}건 삭제 완료`);
+}
+
+// 전체 편지 삭제 (리셋)
+window.confirmDeleteAll = () => {
+  const cnt = allLetters.length;
+  if(cnt === 0){ showToast("✉️ 삭제할 편지가 없어요"); return; }
+  document.getElementById("modal-msg").innerHTML =
+    `⚠️ 편지 <b>전체 ${cnt}건</b>을 삭제합니다.<br>스크린에서도 모두 사라지며 <b>복구할 수 없어요.</b><br>정말 리셋할까요?`;
+  document.getElementById("modal").classList.add("show");
+  document.getElementById("modal-confirm").onclick = doDeleteAll;
+};
+
+function doDeleteAll(){
+  closeModal();
+  remove(ref(db, "letters"))
+    .then(()=>showToast("🧹 전체 편지가 삭제됐어요 · 스크린을 새로고침하세요"))
+    .catch(()=>showToast("❌ 삭제 오류가 발생했어요"));
 }
 
 window.exportCSV=()=>{
