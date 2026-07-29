@@ -35,8 +35,8 @@ body{width:100vw;height:100vh;overflow:hidden;background:#fff;font-family:"Noto 
 #admin-confirm{flex:1;padding:11px;border-radius:10px;border:none;background:#1a3a6e;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:"Noto Sans KR",sans-serif;}
 
 /* QR */
-#qr-wrap{position:fixed;top:20px;right:20px;z-index:40;text-align:center;}
-#qr-code canvas,#qr-code img{width:160px;height:160px;display:block;border-radius:8px;box-shadow:0 3px 12px rgba(0,30,70,0.28);}
+#qr-wrap{position:fixed;top:20px;right:20px;z-index:40;text-align:center;background:#fff;padding:11px;border-radius:14px;box-shadow:0 3px 14px rgba(0,30,70,0.25);}
+#qr-code canvas,#qr-code img{width:130px;height:130px;display:block;}
 #qr-label{display:none;}
 
 /* 편지 스크롤 패널 */
@@ -493,9 +493,8 @@ try{
   onChildAdded(ref(db,"letters"),snap=>{
     const d=snap.val();
     if(!d||d.hidden) return;
-    if(d.timestamp >= todayStart.getTime()){
-      addScrollLetter({...d, key: snap.key});
-    }
+    // 날짜 상관없이 모든 편지를 스크롤 패널/순환 목록에 추가
+    addScrollLetter({...d, key: snap.key});
     if(d.timestamp > startTime){
       let ld = {...d, key: snap.key};
       // 사진 캐시 저장 및 복원 (용량 초과 등 에러가 나도 편지는 반드시 대기열에 넣음)
@@ -519,14 +518,11 @@ function replayLoop(){
   setTimeout(()=>{
     // 새 편지 대기중이거나 화면이 꽉 차면 스킵
     if(letterQueue.length === 0 && active < MAX && todayLetters.length > 0){
-      // 오늘 날짜 필터 (자정 기준)
-      const _todayStart = new Date(); _todayStart.setHours(0,0,0,0);
-      const todayOnly = todayLetters.filter(d => d.timestamp >= _todayStart.getTime());
-      // 아직 안 보여준 것 먼저, 다 보여줬으면 초기화
-      let pool = todayOnly.filter(d => !usedKeys.has(d.key || d.timestamp));
+      // 날짜 상관없이 모든 편지를 무한 순환 (아직 안 보여준 것 먼저, 다 보여줬으면 초기화)
+      let pool = todayLetters.filter(d => !usedKeys.has(d.key || d.timestamp));
       if(pool.length === 0){
         usedKeys.clear();
-        pool = [...todayOnly];
+        pool = [...todayLetters];
       }
       const pick = pool[~~(Math.random() * pool.length)];
       const slot = getSlot();
@@ -536,7 +532,7 @@ function replayLoop(){
       }
     }
     replayLoop();
-  }, 5000);
+  }, 3000);
 }
 replayLoop();
 </script>
